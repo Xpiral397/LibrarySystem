@@ -1,8 +1,8 @@
-# Assuming you have the OTP stored in a variable named 'otp'
-otp = '123456'  # Example OTP
+# Assuming you have the OTP stored in a variable na
 
 # HTML content with dynamic OTP insertion
-html_content = """
+def createContent(otp):
+    return """
 <html>
 <head>
     <style>
@@ -41,9 +41,12 @@ html_content = """
         <h1>OUI Library System</h1>
         <p>This email is sent from OUI Library Management System.</p>
         <p>Account created successfully.</p>
-        <p>Verify your account with this OTP: <span class="otp">{otp}</span></p>
+        <p>Verify your account with this OTP: <span class="otp">
+        """ + otp + """
+        </span>
+        </p>
         <p class="thanks">Thanks from OUI Library Management Team</p>
     </div>
 </body>
 </html>
-""".format(otp=otp)
+"""

@@ -12,10 +12,11 @@ class SendEmail:
         self.sender_email = os.getenv('EMAIL_HOST_USER')
         self.sender_password = os.getenv('EMAIL_HOST_PASSWORD')  # Replace with your password
         self.smtp_server = os.getenv('EMAIL_HOST')  
-        self.smtp_port = os.getenv('EMAIL_HOST')
+        self.smtp_port = os.getenv('EMAIL_PORT')
         self.msg = MIMEMultipart('alternative')
         self.msg['From'] = self.sender_email
         self.msg['To'] = to_email
+        
 
         # Attach HTML content
       
@@ -33,13 +34,13 @@ class SendEmail:
             server = smtplib.SMTP(self.smtp_server, self.smtp_port)
             server.starttls()
             server.login(self.sender_email, self.sender_password)
-            server.sendmail(self.sender_email, self.to_email, self.msg.as_string())
+            server.sendmail(self.sender_email, self.msg['To'], self.msg.as_string())
             server.quit()
             print("Email sent successfully!")
         except Exception as e:
             print("Failed to send email:", str(e))
             
-    def SendAccountSuccessEmail(self,  OTP):
+    def SendOTPSuccessEmail(self,  OTP):
         from .loader import LoadOTPStatus
         html_content, subject = LoadOTPStatus(OTP),"OUI Library Management Account Setup"
         self.html_part = MIMEText(html_content, 'html')

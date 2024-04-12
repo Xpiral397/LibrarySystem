@@ -118,6 +118,20 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
 } 
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'users.auth.CustomTokenAuthentication',
+        # Other authentication classes
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'users.auth.CustomPermission',
+        'rest_framework.permissions.IsAuthenticated',
+        # Other permission classes
+    ],
+    # Other REST Framework settings
+}
+
 DOMAIN = ('localhost:3000') 
 SITE_NAME = ('LibraryAI') 
 

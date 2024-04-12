@@ -25,6 +25,14 @@ import { Step } from "@mui/material";
 import { Button } from "@nextui-org/button";
 import { Yaldevi } from "next/font/google";
 import { error } from "console";
+import api from "@/app/context/api";
+import { login } from "@/app/context/reducers/auth";
+import { useDispatch } from "react-redux";
+import { getUser } from "@/app/context/auth/getUser";
+import { User } from "@/app/context/type";
+import { toast } from "react-toastify";
+import { Login } from "@/app/context/auth/login";
+import { useRouter } from "next/navigation";
 
 const Years = Array.from(
   { length: 5 },
@@ -33,6 +41,8 @@ const Years = Array.from(
 );
 
 export default function SiginCar() {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const [faculty, setFaculty] = useState<string>("");
   const [Name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -85,8 +95,8 @@ export default function SiginCar() {
       }));
     }
 
-    setDisabled(false);
-    setLoading(false);
+    // setDisabled(false);
+    // setLoading(false);
   }, [
     Name,
     loading,
@@ -102,6 +112,52 @@ export default function SiginCar() {
     password,
     re_password,
   ]);
+
+  const signup = async (matric_number: string, password: string) => {
+    setLoading(true);
+    const response = await Login({
+      matric_number: matric,
+      password: password,
+    });
+    if ((await response).status === 200) {
+      const { access_token: accessToken, refresh_token: refreshToken } =
+        response.res;
+      console.log(refreshToken, accessToken, "ji", response);
+      if (accessToken) {
+        const user: any = {
+          user: await getUser(accessToken),
+          accessToken,
+          refreshToken,
+        };
+        dispatch(login(user));
+        toast("Login Successfull", {
+          type: "success",
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        // router.push("/dashboard/discover");
+      }
+    } else {
+      toast("Login Failed, Credential not found ", {
+        type: "error",
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="flex justify-center items-center w-full h-full">
@@ -135,12 +191,11 @@ export default function SiginCar() {
                   <Input
                     classNames={{
                       inputWrapper:
-                        "border border-slate-300 focus:outline-none",
+                        "font-[700] border border-slate-300 focus:outline-none",
                     }}
                     onChange={(e) => setMatric(e.target.value)}
                     isInvalid={error.Matric != ""}
                     errorMessage={error.Matric}
-                    classNames={{ inputWrapper: "font-[700]" }}
                     variant="bordered"
                     color="default"
                     startContent={<Token color="warning" />}
@@ -171,17 +226,30 @@ export default function SiginCar() {
               </div>
               <Button
                 onClick={() => {
-                  setLoading(true);
+                  // setLoading(true);
                   setHas(true);
                   setDisabled(true);
+
+                  if (!error.matric && !error.password && matric && password) {
+                    signup(matric, password);
+                  }
                 }}
                 variant="bordered"
-                disabled={disabled}
+                // disabled={disabled}
                 isLoading={loading}
                 className="bg-purple-700 w-full text-white font-[700]"
               >
                 Sign Up
               </Button>
+
+              <div className="text-center text-purple-500 font-[500]">
+                <h1 className="mt-10 space-x-2 bg-purpe-400">
+                  Don't have account?{" "}
+                  <span>
+                    <a href="/auth/signin">Create one here</a>
+                  </span>
+                </h1>
+              </div>
             </form>
           </div>
         </div>

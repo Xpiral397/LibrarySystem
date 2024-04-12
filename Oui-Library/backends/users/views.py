@@ -1,59 +1,94 @@
 from django.http import JsonResponse
+from django.shortcuts import HttpResponse as Response
 from django.views.decorators.csrf import csrf_exempt
 from .models import UserAccount
 from .email import SendEmail
 from .serializers import UserCreateSerializer
-from .utils import getOTP
+from .utils import *
 from datetime import datetime, timedelta
 from django.utils import timezone
-import json
+from dotenv import load_dotenv
+from rest_framework.views import APIView
+from django.db.utils import IntegrityError
+# from .auth import CustomPermission,CustomTokenAuthentication
+
+load_dotenv()
 
 @csrf_exempt
 def register_user(request):
     if request.method == 'POST':
         data = json.load(request)
         serializer = UserCreateSerializer(data =data)
-        if serializer.is_valid():
-            user = serializer.save()
+        try:
+            if serializer.is_valid():
+                user = serializer.save()
+                otp = getOTP()
+                user.otp = otp.replace('-','')
+                user.otp_expiration_time = datetime.timestamp(datetime.now() + timedelta(minutes=5))
+                user.save()
+                email = SendEmail(data['email'])
+                print(otp)
+                email.SendAccountSuccessEmail(otp);
+                print('ji')
+            else:
+                return JsonResponse({"errors":serializer.errors}, status=400)
+            # Send OTP to user's mobile number (implementation required)
+        except IntegrityError as e:
+            print(e)
+            return JsonResponse({"error":['User already exist',]}, status=400)
+        else:
+            return JsonResponse({'message': 'Registration successful. Please verify Your OTP.'})
+         
+    
+@csrf_exempt
+def re_generate_otp(request):
+    if request.method == 'POST':
+        data = json.load(request)
+        matric_number = data.get('matric_number')
+        try:
+            print(matric_number, UserAccount.objects.values('otp', 'matric_number'))
+            user = UserAccount.objects.get(matric_number=matric_number)
             otp = getOTP()
-            user.otp = otp
+            user.otp = otp.replace('-','')
             user.otp_expiration_time = datetime.timestamp(datetime.now() + timedelta(minutes=5))
             user.save()
-            email = SendEmail(data['email'])
+            email = SendEmail(user.email)
+            print(otp)
             email.SendAccountSuccessEmail(otp);
-            # Send OTP to user's mobile number (implementation required)
-            return JsonResponse({'message': 'Registration successful. Please verify Your OTP.'})
-        return JsonResponse(serializer.errors, status=400)
+            return JsonResponse({'message': 'OTP sent. Please verify Your OTP.'})
+        except UserAccount.DoesNotExist:
+            return JsonResponse({'error': 'You have not registered'}, status=400)
 
 @csrf_exempt
 def verify_otp(request):
     if request.method == 'POST':
-        matric_number = request.POST.get('matric_number')
-        otp_entered = request.POST.get('otp')
+        data = json.load(request)
+        matric_number = data.get('matric_number');
+        otp_entered = data.get('otp')
         try:
-            user = UserAccount.objects.get(matric_number=matric_number)
-            _unexpiredOTP = datetime.now().timestamp() * 1000 < user.otp_expiration_time
-            if user.otp == otp_entered and _unexpiredOTP:
-                user.has_registration_completed = True
+            print(otp_entered,matric_number, UserAccount.objects.values('otp', 'matric_number'))
+            user = UserAccount.objects.get(otp = otp_entered, matric_number=matric_number)
+            _unexpiredOTP = datetime.now().timestamp() < user.otp_expiration_time
+            if _unexpiredOTP:
+                user.has_confirm_otp = True
                 user.save()
                 return JsonResponse({'message': 'OTP verification successful. Registration completed.'})
             return JsonResponse({'error': 'Invalid OTP. Please try again.'}, status=400)
         except UserAccount.DoesNotExist:
-            return JsonResponse({'error': 'User not found.'}, status=400)
-
-from django.contrib.auth import authenticate
-import jwt
+            return JsonResponse({'error': 'User not found.'+matric_number}, status=400)
 
 @csrf_exempt
 def login_user(request):
     if request.method == 'POST':
-        matric_number = request.POST.get('matric_number')
-        password = request.POST.get('password')
+        data = json.load(request)
+        matric_number = data.get('matric_number')
+        password = data.get('password')
 
         if matric_number and password:
             user = authenticate(matric_number=matric_number, password=password)
             if user:
                 # Generate access token and refresh token
+                
                 access_token, refresh_token = generate_tokens(user)
                 return JsonResponse({'access_token': access_token, 'refresh_token': refresh_token})
             else:
@@ -68,18 +103,17 @@ def login_user(request):
 def refresh_token(request):
     if request.method == 'POST':
         # Get refresh token from request data
-        refresh_token = request.POST.get('refresh_token')
+        refresh_token_data = json.loads(request.body.decode('utf-8'))
+        refresh_token = refresh_token_data.get('refresh_token')
         if refresh_token:
             # Verify refresh token
             try:
-                refresh_token_payload = jwt.decode(refresh_token, 'your_refresh_token_secret_key', algorithms=['HS256'])
+                refresh_token_payload = jwt.decode(refresh_token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+                # Convert exp timestamp to UTC timezone-aware datetime
+                exp_datetime = timezone.datetime.utcfromtimestamp(refresh_token_payload['exp']).replace(tzinfo=timezone.utc)
                 # Check if the refresh token is not expired
-                if timezone.now() < timezone.datetime.fromtimestamp(refresh_token_payload['exp']):
-                    # Get user_id from refresh token payload
-                    user_id = refresh_token_payload['user_id']
-                    # Generate new access token
-                    access_token = generate_access_token(user_id)
-                    return JsonResponse({'access_token': access_token})
+                if timezone.now() < exp_datetime:
+                    return JsonResponse({'access_token': refresh_token_payload['access_token']})
                 else:
                     return JsonResponse({'error': 'Refresh token has expired'}, status=400)
             except jwt.ExpiredSignatureError:
@@ -91,40 +125,64 @@ def refresh_token(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
-def generate_tokens(user):
-    # Set token expiration time for access token (for example, 1 hour)
-    access_token_exp_time = timezone.now() + timedelta(hours=1)
-    # Set token expiration time for refresh token (for example, 7 days)
-    refresh_token_exp_time = timezone.now() + timedelta(days=7)
+class UserDashabordView(APIView):
+    # permission_classes = (CustomPermission, CustomTokenAuthentication)
+   
+    def get(self, request):
+        return JsonResponse(UserCreateSerializer(self.request.user).data, safe=False)
     
-    # Generate access token payload
-    access_token_payload = {
-        'user_id': user.id,
-        'username': user.username,
-        'exp': access_token_exp_time,
-    }
-    # Generate access token
-    access_token = jwt.encode(access_token_payload, 'your_access_token_secret_key', algorithm='HS256')
+    def add_new_book(self, request):
+        # Logic to add a new book
+        return Response("New book added")
 
-    # Generate refresh token payload
-    refresh_token_payload = {
-        'user_id': user.id,
-        'exp': refresh_token_exp_time,
-    }
-    # Generate refresh token
-    refresh_token = jwt.encode(refresh_token_payload, 'your_refresh_token_secret_key', algorithm='HS256')
+    def remove_book(self, request):
+        # Logic to remove a book
+        return Response("Book removed")
 
-    return access_token.decode('utf-8'), refresh_token.decode('utf-8')
+    def get_all_borrowed_books(self, request):
+        # Logic to get all borrowed books
+        return Response("List of borrowed books")
 
-def generate_access_token(user_id):
-    # Set token expiration time for access token (for example, 1 hour)
-    access_token_exp_time = timezone.now() + timedelta(hours=1)
-    # Generate access token payload
-    access_token_payload = {
-        'user_id': user_id,
-        'exp': access_token_exp_time,
-    }
-    # Generate access token
-    access_token = jwt.encode(access_token_payload, 'your_access_token_secret_key', algorithm='HS256')
-    return access_token.decode('utf-8')
+    def get_payment_details(self, request):
+        # Logic to get payment details
+        return Response("Payment details")
+
+    def remove_payment(self, request):
+        # Logic to remove payment
+        return Response("Payment removed")
+
+    def modify_book(self, request):
+        # Logic to modify a book
+        return Response("Book modified")
+
+class AdminDashabordView(APIView):
+    name = 'isAdmin'
+    # permission_classes = (CustomPermission, CustomTokenAuthentication)
+    
+    def get_user(self, request):
+        return self.request.user
+    
+    def add_new_book(self, request):
+        # Logic to add a new book
+        return Response("New book added")
+
+    def remove_book(self, request):
+        # Logic to remove a book
+        return Response("Book removed")
+
+    def get_all_borrowed_books(self, request):
+        # Logic to get all borrowed books
+        return Response("List of borrowed books")
+
+    def get_payment_details(self, request):
+        # Logic to get payment details
+        return Response("Payment details")
+
+    def remove_payment(self, request):
+        # Logic to remove payment
+        return Response("Payment removed")
+
+    def modify_book(self, request):
+        # Logic to modify a book
+        return Response("Book modified")
+    

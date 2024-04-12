@@ -26,6 +26,8 @@ class UserAccount(AbstractBaseUser):
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True) 
     department = models.CharField(max_length=100)
+    faculty = models.CharField(max_length=100)
+    gender = models.CharField(max_length=100)
     number = models.CharField(max_length=20)
     expected_year_of_graduation = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
