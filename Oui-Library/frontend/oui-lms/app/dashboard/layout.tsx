@@ -1,3 +1,4 @@
+import { ScrollShadow } from "@nextui-org/react";
 import Sidebar from "./sidebar";
 
 export default function DashboardLayout({
@@ -6,9 +7,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex  h-full  space-x-2 w-full">
-      {/* <Sidebar /> */}
-      {children}
+    <section className="flex  h-screen  w-full">
+      <Sidebar />
+      <ScrollShadow
+        orientation="vertical"
+        hideScrollBar={true}
+        className="max-h-screen h-screen w-full"
+      >
+        {children}
+      </ScrollShadow>
     </section>
   );
 }

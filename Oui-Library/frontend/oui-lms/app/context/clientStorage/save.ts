@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 
-const initialData = {
+export const initialData = {
   auth: {
     user: {
       isAdmin: false,
@@ -68,8 +68,7 @@ export function save<T>(
   // console.log(loadedData);
 }
 
-export function loadData() {
-  const loadedData =
-    JSON.parse(localStorage.getItem("current_data") ?? "null") ?? initialData;
-  return loadedData;
+export function saveAll(data: any) {
+  // const current_user = JSON.parse(localStorage.getItem('current_user')??'null')??initialData
+  localStorage.setItem("data-token", JSON.stringify(data));
 }

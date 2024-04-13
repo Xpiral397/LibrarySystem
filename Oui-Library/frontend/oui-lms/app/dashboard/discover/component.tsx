@@ -21,9 +21,9 @@ export default function BooksRender({
   return (
     <div
       key={key}
-      className="transform hover:scale-105 transition-transform duration-300 shadow-mds rounded-lg w-[100px] h-[150px] bg-white"
+      className="transform hover:scale-105 transition-transform duration-300 shadow-mds rounded-lg w-[250px] h-[350px] bg-yellow-100 flex  items-center justify-center flex-col"
     >
-      <Image src={Category.cover} className="w-full h-[100px]" />
+      <Image src={Category.cover} className="h-[200px]" />
       <div className="p-3">
         <h1 className="font-semibold text-ellipsis w-full">{Category.title}</h1>
         <p className="text-sm">{Category.author}</p>
@@ -34,7 +34,7 @@ export default function BooksRender({
 
 export function Recommended({ RecomendBooks }: { RecomendBooks: Books[] }) {
   return (
-    <div className="bg-white rounded-lg px-5 py-10 shadow-md">
+    <div className="bg-amber-50 rounded-lg px-5 py-10 shadow-md">
       <div className="flex w-full justify-between">
         <p>Recomended</p>
         <span className="bg-blue-50 rounded-sm">
@@ -43,7 +43,7 @@ export function Recommended({ RecomendBooks }: { RecomendBooks: Books[] }) {
           </p>
         </span>
       </div>{" "}
-      <div className="grid grid-cols-5 w-full gap-3">
+      <div className="grid grid-cols-3 w-full h-full gap-10">
         {RecomendBooks.map((category, index) => (
           <BooksRender key={category?.id ?? index} Category={category} />
         ))}
@@ -65,7 +65,7 @@ export function CategoryRender({ RecomendBooks }: { RecomendBooks: Category }) {
       <Tabs radius="md" aria-label="Tabs radius">
         {RecomendBooks.categories.map((cateogry) => (
           <Tab key={cateogry} title={cateogry}>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg::grid-cols-6 w-full gap-3 ">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg::grid-cols-6 w-full gap-10 ">
               {RecomendBooks.category[cateogry].map((category, index) => (
                 <BooksRender key={category?.id ?? index} Category={category} />
               ))}

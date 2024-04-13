@@ -3,6 +3,7 @@ import React, { ReactNode, useState } from "react";
 import Logo from "@/public/logo.png";
 import { Image } from "@nextui-org/react";
 import {
+  ArrowBackIos,
   Category,
   CreditCard,
   Home,
@@ -14,6 +15,7 @@ import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
   const [selected, setSelect] = useState<string>("Discover");
+  const [toggler, setTogggler] = useState<boolean>(false);
   const router = useRouter();
   const Navbars: {
     name: string;
@@ -99,8 +101,15 @@ export default function Sidebar() {
       ),
     },
   ];
-  return (
-    <div className=" w-[300px] h-full shadow-md">
+  return toggler ? (
+    <div className="relative w-[300px] h-full shadow-md">
+      <div
+        onClick={() => setTogggler(!toggler)}
+        className="absolute right-0 -mx-4 flex justify-center items-center   top-0 mt-5 text-[10px] w-8 h-8 rounded-full bg-slate-50 animate-pulse "
+      >
+        <ArrowBackIos color="secondary" fontSize="inherit" />
+      </div>
+
       <ul className="space-y-5 p-5 ">
         {Navbars.map((nav) => {
           return (
@@ -120,6 +129,13 @@ export default function Sidebar() {
           );
         })}
       </ul>
+    </div>
+  ) : (
+    <div
+      onClick={() => setTogggler(!toggler)}
+      className="absolute left-0 mx-2 flex justify-center items-center   top-0 mt-20 text-[10px] w-8 h-8 rounded-full bg-slate-200 z-50 animate-pulse "
+    >
+      <ArrowBackIos color="secondary" fontSize="inherit" />
     </div>
   );
 }
