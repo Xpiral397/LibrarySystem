@@ -27,25 +27,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user = UserModel.objects.create_user(**validated_data)
         return user
 
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = '__all__'
 
-class BookSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Book
-        fields = '__all__'
 
-class BorrowingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Borrowing
-        fields = '__all__'
-
-class PaymentAlertSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentAlert
-        fields = '__all__'
 
 class UserAccountSerializer(serializers.ModelSerializer):
     borrowed_books = BookSerializer(many=True, read_only=True)

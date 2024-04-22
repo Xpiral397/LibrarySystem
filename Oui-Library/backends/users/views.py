@@ -1,9 +1,9 @@
 from django.http import JsonResponse
 from django.shortcuts import HttpResponse as Response
 from django.views.decorators.csrf import csrf_exempt
-from .models import UserAccount
+from .models import Book,UserAccount
 from .email import SendEmail
-from .serializers import UserCreateSerializer
+from .serializers import UserCreateSerializer,BookSerializer
 from .utils import *
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -38,6 +38,32 @@ def register_user(request):
             return JsonResponse({"error":['User already exist',]}, status=400)
         else:
             return JsonResponse({'message': 'Registration successful. Please verify Your OTP.'})
+        
+@csrf_exempt
+def register_admin(request):
+    if request.method == 'POST':
+        data = json.load(request)
+        serializer = UserCreateSerializer(data =data)
+        try:
+            if serializer.is_valid():
+                user = serializer.save()
+                otp = getOTP()
+                user.otp = otp.replace('-','')
+                user.otp_expiration_time = datetime.timestamp(datetime.now() + timedelta(minutes=5))
+                user.save()
+                email = SendEmail(data['email'])
+                print(otp)
+                email.SendAccountSuccessEmail(otp);
+                print('ji')
+            else:
+                return JsonResponse({"errors":serializer.errors}, status=400)
+            # Send OTP to user's mobile number (implementation required)
+        except IntegrityError as e:
+            print(e)
+            return JsonResponse({"error":['User already exist',]}, status=400)
+        else:
+            return JsonResponse({'message': 'Registration successful. Please verify Your OTP.'})
+         
          
     
 @csrf_exempt
@@ -48,7 +74,11 @@ def re_generate_otp(request):
         try:
             print(matric_number, UserAccount.objects.values('otp', 'matric_number'))
             user = UserAccount.objects.get(matric_number=matric_number)
-            otp = getOTP()
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """            otp = getOTP()
             user.otp = otp.replace('-','')
             user.otp_expiration_time = datetime.timestamp(datetime.now() + timedelta(minutes=5))
             user.save()
@@ -67,7 +97,7 @@ def verify_otp(request):
         otp_entered = data.get('otp')
         try:
             print(otp_entered,matric_number, UserAccount.objects.values('otp', 'matric_number'))
-            user = UserAccount.objects.get(otp = otp_entered, matric_number=matric_number)
+            user = Book.objects.get(otp = otp_entered, matric_number=matric_number)
             _unexpiredOTP = datetime.now().timestamp() < user.otp_expiration_time
             if _unexpiredOTP:
                 user.has_confirm_otp = True
@@ -131,30 +161,35 @@ class UserDashabordView(APIView):
     def get(self, request):
         return JsonResponse(UserCreateSerializer(self.request.user).data, safe=False)
     
-    def add_new_book(self, request):
-        # Logic to add a new book
-        return Response("New book added")
-
-    def remove_book(self, request):
-        # Logic to remove a book
-        return Response("Book removed")
-
-    def get_all_borrowed_books(self, request):
-        # Logic to get all borrowed books
-        return Response("List of borrowed books")
-
-    def get_payment_details(self, request):
-        # Logic to get payment details
-        return Response("Payment details")
-
-    def remove_payment(self, request):
-        # Logic to remove payment
-        return Response("Payment removed")
-
-    def modify_book(self, request):
-        # Logic to modify a book
-        return Response("Book modified")
-
+class GetAllAvaliableBooks(APIView):
+    def get(self, request):
+        all_books = Book.objects.all()
+        serializer = BookSerializer(all_books, many=True)
+        return JsonResponse({
+            "books":serializer.data
+        })
+class GetAllBooksByID(APIView):
+    def get(self, request,id):
+        all_books = Book.objects.get(id = id)
+        serializer = BookSerializer(all_books, many=True)
+        return JsonResponse({
+            "books":serializer.data
+        })
+class GetAllBooksByName(APIView):
+    def get(self, request,name):
+        all_books = Book.objects.filter(title_icontains = name)
+        serializer = BookSerializer(all_books, many=True)
+        return JsonResponse({
+            "books":serializer.data
+        })
+class GetAllBooksByAuthor(APIView):
+    def get(self, request, author):
+        all_books = Book.objects.filter(author_icontains = author)
+        serializer = BookSerializer(all_books, many=True)
+        return JsonResponse({
+            "books":serializer.data
+        })
+        
 class AdminDashabordView(APIView):
     name = 'isAdmin'
     # permission_classes = (CustomPermission, CustomTokenAuthentication)

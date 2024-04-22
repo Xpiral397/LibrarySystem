@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+from admin.models import Book, Balance
 from django.utils import timezone
 
 class CustomUserManager(BaseUserManager):
@@ -14,13 +15,7 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, matric_number, full_name, department, expected_year_of_graduation, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-
-        return self.create_user(matric_number, full_name, department, expected_year_of_graduation, password, **extra_fields)
+        return self.create_user(full_name =full_name, password = password, matric_number = 'N/A', department="Administrator", expected_year_of_graduation="N/A", **extra_fields)
 
 class UserAccount(AbstractBaseUser):
     name = models.CharField(max_length=100)
@@ -40,6 +35,7 @@ class UserAccount(AbstractBaseUser):
     otp_expiration_time = models.IntegerField(default=0)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    balance = models.OneToOneField(Balance, verbose_name=_(""), on_delete=models.CASCADE)
 
     objects = CustomUserManager()
 
@@ -49,36 +45,8 @@ class UserAccount(AbstractBaseUser):
     def __str__(self):
         return self.matric_number
 
-class Genre(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
-
-    def __str__(self):
-        return self.name
-
-class Book(models.Model):
-    rate =  models.IntegerField()
-    number_of_people_rated = models.IntegerField()
-    likes = models.IntegerField()
-    unlike = models.IntegerField()
-    loved = models.IntegerField()
-    title = models.CharField(max_length=200)
-    author = models.CharField(max_length=100)
-    total_pages = models.IntegerField()
-    ISBN = models.CharField(max_length=100)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.IntegerField(default=0)
-    image = models.ImageField(upload_to='books/')
-    pdf_file = models.FileField(upload_to='books/pdfs/', null=True, blank=True)
-    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='books', null=True, blank=True)
-    genres = models.ManyToManyField(Genre)
-
-    def __str__(self):
-        return self.title
 
 class Borrowing(models.Model):
-    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     borrow_date = models.DateField(default=timezone.now)
     return_date = models.DateField(null=True, blank=True)

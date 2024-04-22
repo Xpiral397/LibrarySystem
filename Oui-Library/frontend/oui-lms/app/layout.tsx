@@ -26,6 +26,8 @@ export const metadata: Metadata = {
   },
 };
 import "react-toastify/dist/ReactToastify.css";
+import UseSelectedBookProvider from "./context/useSelectBooks/useSelectBooks";
+import UseBooksProvider from "./context/useSelectBooks/useSelectContext";
 
 export default function RootLayout({
   children,
@@ -41,13 +43,15 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex flex-col h-screen">
-            <Navbar />
-            <ToastContainer />
-            <main className="w-full h-full">{children}</main>
-          </div>
-        </Providers>
+        <UseBooksProvider>
+          <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+            <div className="relative flex flex-col h-screen">
+              <Navbar />
+              <ToastContainer />
+              <main className="w-full h-full">{children}</main>
+            </div>
+          </Providers>
+        </UseBooksProvider>
       </body>
     </html>
   );

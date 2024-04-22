@@ -11,13 +11,12 @@ const loadState = () => {
     }
     return JSON.parse(serializedState);
   } catch (err) {
-    console.error("Error loading state from localStorage:", err);
     return initialData;
   }
 };
 
 // Save state to localStorage
-const saveState = (state) => {
+const saveState = (state:any) => {
   try {
     const serializedState = JSON.stringify(state);
     localStorage.setItem("data-token", serializedState);

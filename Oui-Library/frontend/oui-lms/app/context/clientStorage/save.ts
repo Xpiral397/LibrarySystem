@@ -1,19 +1,24 @@
 import { toast } from "react-toastify";
+import { InitialData } from "../type";
 
 export const initialData = {
   auth: {
     user: {
-      isAdmin: false,
-      username: null,
-      matric: null,
+      name: null,
       email: null,
       department: null,
-      level: null,
       faculty: null,
-      name: null,
-      id: null,
-      mobile: null,
-      verified: false,
+      gender: null,
+      number: null,
+      expected_year_of_graduation: null,
+      password: null,
+      matric_number: null,
+      full_name: null,
+      otp: 0,
+      has_confirm_otp: false,
+      otp_expiration_time: 0,
+      is_staff: false,
+      is_active: false,
     },
     meta: {
       matric_number: "",
@@ -24,30 +29,18 @@ export const initialData = {
     refreshToken: null,
   },
 };
+export function loadData(): InitialData {
+  const loadedData =
+    JSON.parse(localStorage.getItem("current_data") ?? "null") ?? initialData;
 
+  return loadedData;
+}
 export function save<T>(
   slicer: "auth",
   data: T,
   userDisplay?: string,
   type: string = "register"
 ) {
-  function loadData() {
-    const loadedData =
-      JSON.parse(localStorage.getItem("current_data") ?? "null") ?? initialData;
-    if (type === "register")
-      toast("OTP sent successfully", {
-        position: "top-right",
-        type: "success",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-    return loadedData;
-  }
   const loadedData = loadData();
   loadedData[slicer] = data;
   localStorage.setItem("current_data", JSON.stringify(loadedData));

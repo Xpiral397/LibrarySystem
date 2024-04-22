@@ -13,9 +13,9 @@ import {
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 
-export default function Sidebar() {
+export default function Sidebar({ sm }: { sm?: boolean }) {
   const [selected, setSelect] = useState<string>("Discover");
-  const [toggler, setTogggler] = useState<boolean>(false);
+  const [toggler, setTogggler] = useState<boolean>(sm ?? true);
   const router = useRouter();
   const Navbars: {
     name: string;
@@ -24,7 +24,7 @@ export default function Sidebar() {
   }[] = [
     {
       name: "Discover",
-      links: "/discover",
+      links: "/dashboard/discover",
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
@@ -37,7 +37,7 @@ export default function Sidebar() {
     },
     {
       name: "Category",
-      links: "/category",
+      links: "/dashboard/category",
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
@@ -50,7 +50,7 @@ export default function Sidebar() {
     },
     {
       name: "Reserved Books",
-      links: "/reserve",
+      links: "/dashboard/reserves",
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
@@ -63,7 +63,7 @@ export default function Sidebar() {
     },
     {
       name: "Lend Books",
-      links: "/Lend",
+      links: "/dashboard/lend",
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
@@ -75,8 +75,8 @@ export default function Sidebar() {
       ),
     },
     {
-      name: "Subscriptions",
-      links: "/subscription",
+      name: "Expenditure",
+      links: "/dashboard/expenses",
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
@@ -89,20 +89,20 @@ export default function Sidebar() {
     },
     {
       name: "Checks",
-      links: "/subscription",
+      links: "/dashboard/checks",
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
             selected === "Checks" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
-          <Verified color="inherit" fontSize="small" fontSize="small" />
+          <Verified color="inherit" fontSize="small" />
         </div>
       ),
     },
   ];
   return toggler ? (
-    <div className="relative w-[300px] h-full shadow-md">
+    <div className="bg-white relative w-[250px] h-full shadow-md">
       <div
         onClick={() => setTogggler(!toggler)}
         className="absolute right-0 -mx-4 flex justify-center items-center   top-0 mt-5 text-[10px] w-8 h-8 rounded-full bg-slate-50 animate-pulse "

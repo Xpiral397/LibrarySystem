@@ -19,7 +19,7 @@ export interface Books {
 }
 export default function Sidebar({ Book }: { Book: Books }) {
   return (
-    <div className="text-white space-y-10 font-[300] text-[16px] rounded-lg flex flex-col text-center   w-full h-full ">
+    <div className="text-white space-y-10 font-[300] text-[16px] rounded-lg flex flex-col text-center mt-5   w-full h-full ">
       <div className="bg-slate-100 rounded-lg py-5 px-3">
         <div className="w-full px-10">
           <Image src={Books.src} />
