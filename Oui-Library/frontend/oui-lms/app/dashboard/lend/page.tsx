@@ -3,11 +3,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar, { Books } from "../reserves/sidebar";
 import { useRouter } from "next/navigation";
 import Book from "@/public/books.jpg";
-import {
-  Category,
-  CategoryRender,
-  Recommended,
-} from "../../admin/reserved/component/component";
+import { Category, CategoryRender, Recommended } from "./component";
 import { ScrollShadow } from "@nextui-org/react";
 import { InitialData } from "@/app/context/type";
 import { loadData } from "@/app/context/clientStorage/save";
