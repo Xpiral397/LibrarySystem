@@ -15,7 +15,7 @@ interface UserLoginPayload {
 
 export const verifyOTP = async (otp: string) => {
   try {
-    const response = await api.post("/verify-otp/", {
+    const response = await api.post("/user/verify-otp/", {
       matric_number: store.getState().auth.meta.matric_number,
       otp,
     });

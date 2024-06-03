@@ -15,7 +15,7 @@ interface UserLoginPayload {
 
 export const resendOTP = async () => {
   try {
-    const response = await api.post("/resend-otp/", {
+    const response = await api.post("/user/otp/", {
       matric_number: store.getState().auth.meta.matric_number,
     });
     if (response.status == 200) {

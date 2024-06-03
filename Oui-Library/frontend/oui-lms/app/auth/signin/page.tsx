@@ -141,7 +141,7 @@ export default function SiginCar() {
           progress: undefined,
           theme: "light",
         });
-        // router.push("/dashboard/discover");
+        router.push("/dashboard/discover");
       }
     } else {
       toast("Login Failed, Credential not found ", {
@@ -246,7 +246,7 @@ export default function SiginCar() {
                 <h1 className="mt-10 space-x-2 bg-purpe-400">
                   Don't have account?{" "}
                   <span>
-                    <a href="/auth/signin">Create one here</a>
+                    <a href="/auth/signup">Create one here</a>
                   </span>
                 </h1>
               </div>

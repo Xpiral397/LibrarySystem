@@ -8,7 +8,7 @@ interface UserLoginPayload {
 
 export const Login = async (user: UserLoginPayload) => {
   try {
-    const response = await api.post("/login/", user);
+    const response = await api.post("/user/login/", user);
     if (response.status == 200) {
       return { status: 200, res: response.data };
     } else {

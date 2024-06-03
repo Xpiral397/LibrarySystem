@@ -43,10 +43,11 @@ import { initialData, loadData } from "@/app/context/clientStorage/save";
 import { Person } from "@mui/icons-material";
 
 export const Navbar = () => {
+  const loaded = false;
   const [userData, setDataUserata] = useState<InitialData>(initialData);
   useEffect(() => {
     setDataUserata(loadData());
-  }, [userData]);
+  }, []);
   return (
     <NextUINavbar maxWidth="full" position="sticky" className="shadow-md">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -70,13 +71,15 @@ export const Navbar = () => {
           {" "}
           <Dropdown backdrop="opaque">
             <DropdownTrigger>
-              <User
-                name={userData.auth.user.full_name}
-                description={userData.auth.user.department}
-                avatarProps={{
-                  src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-                }}
-              />
+              {userData?.auth?.user?.full_name && (
+                <User
+                  name={userData.auth.user.full_name}
+                  description={userData.auth.user.department}
+                  avatarProps={{
+                    src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+                  }}
+                />
+              )}
             </DropdownTrigger>
             <DropdownMenu
               className="w-max-xl"
@@ -153,7 +156,7 @@ export const Navbar = () => {
                     </p>
                   </div>
                 </div>{" "}
-                <Button className="mt-2 w-full bg-red-500 text-slate-50 text-center font-semibold">
+                <Button onClick= {log } className="mt-2 w-full bg-red-500 text-slate-50 text-center font-semibold">
                   Logout
                 </Button>
               </DropdownItem>
@@ -169,13 +172,15 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <User
-          name="Jane Doe"
-          description="Product Designer"
-          avatarProps={{
-            src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-          }}
-        />
+        {userData?.auth?.user?.full_name && (
+          <User
+            name={userData.auth.user.full_name}
+            description={userData.auth.user.department}
+            avatarProps={{
+              src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+            }}
+          />
+        )}
         <NavbarMenuToggle />
       </NavbarContent>
 

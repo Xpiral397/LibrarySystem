@@ -16,7 +16,7 @@ interface UserLoginPayload {
 
 export const signup = async (user: UserLoginPayload) => {
   try {
-    const response = await api.post("/register/", user);
+    const response = await api.post("/user/register/", user);
     console.log(response);
     if (response.status == 200) {
       signupData(response.data?.matric_number);

@@ -31,23 +31,26 @@ DEBUG = os.getenv('DEBUG') == 'True'  # Convert string 'True' to boolean True
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # or the origin of your frontend
+    "http://localhost:3001",  # or the origin of your frontend
 ]
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-# Application definition
+CORS_ALLOWED_ORIGINS
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders'   ,
+     'admins',
     'users',
     "compressor",
     "rest_framework",
     'rest_framework_simplejwt',
+     'share',
     'djoser'
 ]
 # settings.py
@@ -78,7 +81,7 @@ SIMPLE_JWT ={
     "AUTH_HEADER_TYPES":("JWT",)
 }
 
-AUTH_USER_MODEL = 'users.UserAccount'
+AUTH_USER_MODEL = 'share.UserAccount'
 
 
 
@@ -103,6 +106,7 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -121,11 +125,11 @@ SIMPLE_JWT = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'users.auth.CustomTokenAuthentication',
+        'share.auth.CustomTokenAuthentication',
         # Other authentication classes
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'users.auth.CustomPermission',
+        'share.auth.CustomPermission',
         'rest_framework.permissions.IsAuthenticated',
         # Other permission classes
     ],
@@ -133,7 +137,14 @@ REST_FRAMEWORK = {
 }
 
 DOMAIN = ('localhost:3000') 
-SITE_NAME = ('LibraryAI') 
+SITE_NAME = ('OUI Library System ') 
+
+CORS_ALLOWED_ORIGINS = [
+    "https://example.com",
+    "https://sub.example.com",
+    "http://localhost:3001",
+    "http://127.0.0.1:9000",
+]
 
 ROOT_URLCONF = 'LibraryAI.urls'
 

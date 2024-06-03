@@ -1,5 +1,5 @@
 "use client";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import Logo from "@/public/logo.png";
 import { Image } from "@nextui-org/react";
 import {
@@ -14,7 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function Sidebar({ sm }: { sm?: boolean }) {
-  const [selected, setSelect] = useState<string>("Discover");
+  const [selected, setSelect] = useState<string>("discover");
   const [toggler, setTogggler] = useState<boolean>(sm ?? true);
   const router = useRouter();
   const Navbars: {
@@ -28,7 +28,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
-            selected === "Discover" ? "bg-secondary-500" : "bg-slate-300"
+            selected === "discover" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
           <Home color="inherit" fontSize="small" />
@@ -41,7 +41,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
-            selected === "Category" ? "bg-secondary-500" : "bg-slate-300"
+            selected === "category" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
           <Category color="inherit" fontSize="small" />
@@ -54,7 +54,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
-            selected === "Reserved Books" ? "bg-secondary-500" : "bg-slate-300"
+            selected === "reserves" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
           <SafetyCheck color="inherit" fontSize="small" />
@@ -67,7 +67,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
-            selected === "Lend Books" ? "bg-secondary-500" : "bg-slate-300"
+            selected === "lend" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
           <CreditCard color="inherit" fontSize="small" />
@@ -80,7 +80,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
-            selected === "Subscriptions" ? "bg-secondary-500" : "bg-slate-300"
+            selected === "expenses" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
           <Payment color="inherit" fontSize="small" />
@@ -93,7 +93,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       icon: (
         <div
           className={`flex items-center w-ful h-full justify-center rounded-md py-1 px-1 text-white ${
-            selected === "Checks" ? "bg-secondary-500" : "bg-slate-300"
+            selected === "checks" ? "bg-secondary-500" : "bg-slate-300"
           }`}
         >
           <Verified color="inherit" fontSize="small" />
@@ -101,6 +101,7 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
       ),
     },
   ];
+
   return toggler ? (
     <div className="bg-white relative w-[250px] h-full shadow-md">
       <div
@@ -116,8 +117,9 @@ export default function Sidebar({ sm }: { sm?: boolean }) {
             <li
               onClick={() => {
                 router.push(nav.links);
+                setSelect(nav.links.split("/")[2]);
               }}
-              className="flex items-center jsutify-center w-ful h-full font-semibold  space-x-3  hover:bg-slate-50"
+              className=" cursor-pointer flex items-center jsutify-center w-ful h-full font-semibold  space-x-3  hover:bg-slate-50"
             >
               <div>{nav.icon}</div>
               {selected == nav.name ? (

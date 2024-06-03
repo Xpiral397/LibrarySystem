@@ -1,6 +1,5 @@
 from rest_framework.views import APIView
 from django.shortcuts import HttpResponse as Response
-from .serializers import UserAccountSerializer
 
 
 class UserDashabordView(APIView):

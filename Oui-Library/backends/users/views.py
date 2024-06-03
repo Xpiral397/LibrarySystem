@@ -2,9 +2,10 @@ from django.http import JsonResponse
 from django.shortcuts import HttpResponse as Response
 from django.views.decorators.csrf import csrf_exempt
 from .models import Book,UserAccount
-from .email import SendEmail
-from .serializers import UserCreateSerializer,BookSerializer
-from .utils import *
+from share.email import SendEmail
+from .serializers import UserCreateSerializer
+from share.serializers import BookSerializer
+from share.utils import *
 from datetime import datetime, timedelta
 from django.utils import timezone
 from dotenv import load_dotenv
@@ -15,10 +16,10 @@ from django.db.utils import IntegrityError
 load_dotenv()
 
 @csrf_exempt
-def register_user(request):
+def register(request):
     if request.method == 'POST':
         data = json.load(request)
-        serializer = UserCreateSerializer(data =data)
+        serializer = UserCreateSerializer(data = data)
         try:
             if serializer.is_valid():
                 user = serializer.save()
@@ -39,31 +40,7 @@ def register_user(request):
         else:
             return JsonResponse({'message': 'Registration successful. Please verify Your OTP.'})
         
-@csrf_exempt
-def register_admin(request):
-    if request.method == 'POST':
-        data = json.load(request)
-        serializer = UserCreateSerializer(data =data)
-        try:
-            if serializer.is_valid():
-                user = serializer.save()
-                otp = getOTP()
-                user.otp = otp.replace('-','')
-                user.otp_expiration_time = datetime.timestamp(datetime.now() + timedelta(minutes=5))
-                user.save()
-                email = SendEmail(data['email'])
-                print(otp)
-                email.SendAccountSuccessEmail(otp);
-                print('ji')
-            else:
-                return JsonResponse({"errors":serializer.errors}, status=400)
-            # Send OTP to user's mobile number (implementation required)
-        except IntegrityError as e:
-            print(e)
-            return JsonResponse({"error":['User already exist',]}, status=400)
-        else:
-            return JsonResponse({'message': 'Registration successful. Please verify Your OTP.'})
-         
+  
          
     
 @csrf_exempt
@@ -74,11 +51,7 @@ def re_generate_otp(request):
         try:
             print(matric_number, UserAccount.objects.values('otp', 'matric_number'))
             user = UserAccount.objects.get(matric_number=matric_number)
-    """_summary_
-
-    Returns:
-        _type_: _description_
-    """            otp = getOTP()
+            otp = getOTP()
             user.otp = otp.replace('-','')
             user.otp_expiration_time = datetime.timestamp(datetime.now() + timedelta(minutes=5))
             user.save()
@@ -97,7 +70,7 @@ def verify_otp(request):
         otp_entered = data.get('otp')
         try:
             print(otp_entered,matric_number, UserAccount.objects.values('otp', 'matric_number'))
-            user = Book.objects.get(otp = otp_entered, matric_number=matric_number)
+            user = UserAccount.objects.get(otp = otp_entered, matric_number=matric_number)
             _unexpiredOTP = datetime.now().timestamp() < user.otp_expiration_time
             if _unexpiredOTP:
                 user.has_confirm_otp = True
@@ -108,7 +81,7 @@ def verify_otp(request):
             return JsonResponse({'error': 'User not found.'+matric_number}, status=400)
 
 @csrf_exempt
-def login_user(request):
+def login(request):
     if request.method == 'POST':
         data = json.load(request)
         matric_number = data.get('matric_number')
@@ -118,7 +91,6 @@ def login_user(request):
             user = authenticate(matric_number=matric_number, password=password)
             if user:
                 # Generate access token and refresh token
-                
                 access_token, refresh_token = generate_tokens(user)
                 return JsonResponse({'access_token': access_token, 'refresh_token': refresh_token})
             else:
@@ -139,6 +111,7 @@ def refresh_token(request):
             # Verify refresh token
             try:
                 refresh_token_payload = jwt.decode(refresh_token, os.getenv('SECRET_KEY'), algorithms=['HS256'])
+                print(refresh_token_payload,'paylaod')
                 # Convert exp timestamp to UTC timezone-aware datetime
                 exp_datetime = timezone.datetime.utcfromtimestamp(refresh_token_payload['exp']).replace(tzinfo=timezone.utc)
                 # Check if the refresh token is not expired

@@ -3,7 +3,7 @@ import api from "../api";
 export async function getUser(accessToken: string) {
   try {
     return (
-      await api.get("/me", {
+      await api.get("/user/me", {
         headers: {
           Authorization: `JWT ${accessToken}`,
         },

@@ -145,7 +145,11 @@ export default function SiginCar() {
 
       console.log(loading, disabled);
       if (signupUser.status == 200) {
-        dispatch(signupData({ matric_number: matric }));
+        try {
+          dispatch(signupData({ matric_number: matric }));
+        } catch (e) {
+          console.log("error");
+        }
         toast(
           "Registration Completed!, 🦄 Wow so easy!, Verify OTP sent to your gmail",
           {
